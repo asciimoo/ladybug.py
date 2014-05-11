@@ -182,3 +182,15 @@ class Manager(object):
 
         return Manager(
             self.model.__class__, data=self._data, include=new_include)
+
+    def group_by(self, column, function=list, key=None):
+        if key:
+            def func(rows):
+                return function(row[key] for row in rows)
+        else:
+            func = function
+        unique_values = set(row[column] for row in self)
+        return {
+            row: func(r for r in self if r[column] == row)
+            for row in unique_values
+        }
