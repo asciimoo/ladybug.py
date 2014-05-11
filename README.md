@@ -98,7 +98,7 @@ table.save("example_output.csv")
 ```
 
 ## Supported dialects
-ladybug.py uses `DictReader` and `DictWriter`. It's possible to user keyword arguments of those, so all dialects accepted by `DictReader` and `DictWriter` can be handled.
+ladybug.py uses `DictReader` and `DictWriter`. It's possible to use keyword arguments of those, so all dialects accepted by `DictReader` and `DictWriter` can be handled.
 
 The following example shows how to convert a CSV file to another dialect using ladybug.py
 ```python
