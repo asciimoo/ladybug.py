@@ -21,3 +21,10 @@ try:
         name="Carlos", salary=6000, department="Management")
 except ValueError:
     print "Inserting like that is not possible"
+
+cc_table = table.copy
+print list(table.filter(name="Maria").rows)
+print list(cc_table.filter(name="Maria").rows)
+cc_table.filter(name="Maria").update(department="IT")
+print list(table.filter(name="Maria").rows)
+print list(cc_table.filter(name="Maria").rows)

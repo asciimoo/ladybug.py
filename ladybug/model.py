@@ -83,10 +83,15 @@ class Table(object):
         class result_class(dict):
             def __init__(self, row):
                 super(result_class, self).__init__()
+                self.row = row
                 other = other_class()
                 for name in other.columns:
                     value = row[name]
                     self.update({name: other.get_field(name)[1](value)})
+
+            def copy(self):
+                return dict(self.iteritems())
+
         result_class.__name__ = self.__class__.__name__ + "Object"
         return result_class
 
@@ -134,6 +139,13 @@ class Manager(object):
     @property
     def rows(self):
         return (self._data[i] for i in self._include)
+
+    @property
+    def copy(self):
+        new_data = list(row.copy() for row in self.rows)
+        new_include = list(range(len(new_data)))
+        return Manager(
+            model=self.model.__class__, data=new_data, include=new_include)
 
     def __iter__(self):
         return self.rows

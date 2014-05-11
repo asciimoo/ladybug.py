@@ -4,7 +4,7 @@ ladybug.py
 Handle CSV files using table models and queries.
 
 ## Table models
-ladybug.py handles CSV files through table models. You need to define a table model for your files through subclassing `Table`.
+ladybug.py handles CSV files through table models. You need to define a table model for your files by subclassing `Table`.
 
 An example
 ```python
@@ -13,7 +13,7 @@ class ExampleTable(Table):
     salary = Field(format=int)
     department = Field()
 ```
-
+    
 ## Table managers
 Table managers are objects that contain actual tables, built from a table model. There are two ways to create a table manager:
 ```python
@@ -79,7 +79,7 @@ Result:
 ```
 
 #### .update
-Updates existing rows in a (filtered) manager
+Updates existing rows in a (filtered) manager. This is an in-place mutation.
 ```python
 # Set salary for entire office
 table.update(salary=2000)
@@ -91,10 +91,31 @@ table.filter(department="IT").update(salary=3000)
 table.filter(department="IT", name="Joe").update(salary=2700)
 ```
 
-#### .save()
+#### .save
 Save manager into a .csv file.
 ```python
 table.save("example_output.csv")
+```
+
+#### .copy
+Using `.copy` it is possible to have a copy of a (filtered) managers. This means
+that you can change rows in the copy while the original remains intact.
+
+##### Updating a copy
+```python
+cc_table = table.copy
+print list(table.filter(name="Maria").rows)
+print list(cc_table.filter(name="Maria").rows)
+cc_table.filter(name="Maria").update(department="IT")
+print list(table.filter(name="Maria").rows)
+print list(cc_table.filter(name="Maria").rows)
+```
+Output:
+```python
+[{'salary': 2500, 'department': 'Sales', 'name': 'Maria'}]
+[{'salary': 2500, 'department': 'Sales', 'name': 'Maria'}]
+[{'salary': 2500, 'department': 'Sales', 'name': 'Maria'}]  # Intact
+[{'salary': 2500, 'department': 'IT', 'name': 'Maria'}]  # Updated
 ```
 
 ## Supported dialects
