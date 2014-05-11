@@ -155,6 +155,13 @@ class Manager(object):
             for name in kwargs:
                 self._data[index][name] = kwargs[name]
 
+    def insert(self, **kwargs):
+        if len(self._data) == len(self._include):
+            self._data.append(self.model.result_class(kwargs))
+            self._include.append(len(self._include))
+        else:
+            raise ValueError("Cannot insert into filtered results")
+
     def __getitem__(self, key):
         return self.column(key)
 

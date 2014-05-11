@@ -12,3 +12,12 @@ print table.group_by("department", key="name")
 print table.group_by("department", function=sum, key="salary")
 table.filter(department="IT").update(salary=2700)
 print table.group_by("department", function=sum, key="salary")
+
+table.insert(name="Carlos", salary=6000, department="Management")
+table.save("example_output.csv", delimiter=";")
+print table.group_by("department", key="name")
+try:
+    table.filter(department="Management").insert(
+        name="Carlos", salary=6000, department="Management")
+except ValueError:
+    print "Inserting like that is not possible"
