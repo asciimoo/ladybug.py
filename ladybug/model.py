@@ -1,6 +1,7 @@
 # This module provides a Table class for CSV files, that works
 # similarly to Django models.
 from csv import DictReader, DictWriter
+import itertools
 
 
 def cmp_to_key(mycmp):
@@ -37,7 +38,10 @@ class Table(object):
         super(Table, self).__init__()
         self.initalize_fields()
         if self.columns is None:
-            self.columns = list(sorted(name for name, _ in self.fields))
+            self.columns = list(sorted(
+                (name for name, _ in self.fields),
+                key=lambda f: self.get_field(f)[1].field_order_id
+            ))
 
     @property
     def fields(self):
@@ -57,8 +61,8 @@ class Table(object):
                 member.column = name
 
     @classmethod
-    def manager(cls, reader=None, writer=None):
-        return Manager(cls, reader, writer)
+    def manager(cls):
+        return Manager(cls)
 
     @classmethod
     def open(cls, csvfile, **kwargs):
@@ -87,7 +91,16 @@ class Table(object):
         return result_class
 
 
-class Field(object):
+class BaseField(object):
+    """Base class for fields"""
+    _counter = itertools.count()
+
+    def __init__(self):
+        super(BaseField, self).__init__()
+        self.field_order_id = self._counter.next()
+
+
+class Field(BaseField):
     """A field that's mapped to a column of a CSV file"""
     def __init__(self, format=str, column=None):
         super(Field, self).__init__()

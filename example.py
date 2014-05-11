@@ -2,8 +2,6 @@ from ladybug.model import Table, Field
 
 
 class ExampleTable(Table):
-    columns = ("name", "salary", "department")
-
     name = Field()
     salary = Field(format=int)
     department = Field()
