@@ -42,3 +42,21 @@ print table.group_by("department", key="name")
 
 print list(table.export_rows(first_name="name", dept="department"))
 print table.group_by("name_length", key="name")
+
+
+class Employee(Table):
+    name = Field()
+    hours = Field(format=int)  # hours a week
+    salary = Field(format=int)  # weekly salary
+    wage = Field(
+        function=lambda hours, salary: salary / hours,
+        depends=["hours", "salary"]
+    )
+
+employees = Employee.create()
+employees.append_rows([
+    {"name": "Bob", "hours": 40, "salary": 700},
+    {"name": "Joe", "hours": 30, "salary": 700},
+    {"name": "Roland", "hours": 35, "salary": 500},
+], name="name", hours="hours", salary="salary")
+print employees.group_by("name", key="wage")
