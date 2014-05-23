@@ -56,13 +56,33 @@ class Table(object):
                 (name for name, _ in self.fields),
                 key=lambda f: self.get_field(f)[1].field_order_id
             ))
+        self.static_columns = list(sorted(
+            (name for name, _ in self.__static_fields),
+            key=lambda f: self.get_field(f)[1].field_order_id
+        ))
 
     @property
     def fields(self):
         return (
             self.get_field(name)
             for name in dir(self)
-            if isinstance(getattr(self, name), Field)
+            if isinstance(getattr(self, name), BaseField)
+        )
+
+    @property
+    def __static_fields(self):
+        return (
+            self.get_field(name)
+            for name in dir(self)
+            if isinstance(getattr(self, name), StaticField)
+        )
+
+    @property
+    def dynamic_fields(self):
+        return (
+            name
+            for name in dir(self)
+            if isinstance(getattr(self, name), DynamicField)
         )
 
     @classmethod
@@ -99,7 +119,7 @@ class Table(object):
                 super(result_class, self).__init__()
                 self.row = row
                 other = other_class()
-                for name in other.columns:
+                for name in other.static_columns:
                     value = row[name]
                     self.update({name: other.get_field(name)[1](value)})
 
@@ -119,15 +139,37 @@ class BaseField(object):
         self.field_order_id = self._counter.next()
 
 
-class Field(BaseField):
+def Field(**kwargs):
+    if "format" in kwargs:
+        return StaticField(**kwargs)
+    elif "function" in kwargs:
+        return DynamicField(**kwargs)
+    elif not kwargs:
+        return StaticField()
+    else:
+        raise ValueError("A format or a function is required")
+
+
+class StaticField(BaseField):
     """A field that's mapped to a column of a CSV file"""
     def __init__(self, format=str, column=None):
-        super(Field, self).__init__()
+        super(StaticField, self).__init__()
         self.format = format
         self.column = column
 
     def __call__(self, value):
         return self.format(value)
+
+
+class DynamicField(BaseField):
+    """A field with a value calculated on the fly"""
+    def __init__(self, function, column=None):
+        super(DynamicField, self).__init__()
+        self.function = function
+        self.column = column
+
+    def __call__(self, row, manager):
+        return self.function(row, manager)
 
 
 class Manager(object):
@@ -170,7 +212,12 @@ class Manager(object):
 
     @property
     def rows(self):
-        return (self._data[i] for i in self._include)
+        for i in self._include:
+            row = dict(self._data[i].iteritems())
+            for name in self.model.dynamic_fields:
+                value = self.model.get_field(name)[1](row, self)
+                row.update({name: value})
+            yield row
 
     @property
     def copy(self):

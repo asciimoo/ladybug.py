@@ -5,6 +5,7 @@ class ExampleTable(Table):
     name = Field()
     salary = Field(format=int)
     department = Field()
+    name_length = Field(function=lambda row, manager: len(row["name"]))
 
 table = ExampleTable.open("example.csv")
 print table.group_by("department")
@@ -40,3 +41,4 @@ table.append_rows(
 print table.group_by("department", key="name")
 
 print list(table.export_rows(first_name="name", dept="department"))
+print table.group_by("name_length", key="name")
