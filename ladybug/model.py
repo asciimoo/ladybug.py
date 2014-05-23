@@ -163,13 +163,14 @@ class StaticField(BaseField):
 
 class DynamicField(BaseField):
     """A field with a value calculated on the fly"""
-    def __init__(self, function, column=None):
+    def __init__(self, function, column=None, depends=None):
         super(DynamicField, self).__init__()
         self.function = function
         self.column = column
+        self.depends = depends if depends is not None else list()
 
-    def __call__(self, row, manager):
-        return self.function(row, manager)
+    def __call__(self, **kwargs):
+        return self.function(**kwargs)
 
 
 class Manager(object):
@@ -215,7 +216,12 @@ class Manager(object):
         for i in self._include:
             row = dict(self._data[i].iteritems())
             for name in self.model.dynamic_fields:
-                value = self.model.get_field(name)[1](row, self)
+                field = self.model.get_field(name)[1]
+                kwargs = {
+                    name: value for name, value in row.iteritems()
+                    if name in field.depends
+                }
+                value = field(**kwargs)
                 row.update({name: value})
             yield row
 
