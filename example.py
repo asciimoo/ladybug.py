@@ -54,6 +54,10 @@ class Employee(Table):
     def wage(hours, salary):
         return salary / hours
 
+    @field(column="annual")
+    def annual_salary(weeks, salary):
+        return weeks * salary
+
 
 employees = Employee.create()
 employees.append_rows([
@@ -62,3 +66,4 @@ employees.append_rows([
     {"name": "Roland", "hours": 35, "salary": 500, "weeks": 45},
 ], name="name", hours="hours", salary="salary", weeks="weeks")
 print employees.group_by("name", key="wage")
+print list(employees.filter(name="Joe").rows)

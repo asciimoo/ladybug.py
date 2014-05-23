@@ -151,9 +151,18 @@ def Field(**kwargs):
         raise ValueError("A format or a function is required")
 
 
-def field(func):
-    args = getargspec(func).args
-    return Field(function=func, depends=args)
+def field(*args, **kwargs):
+    if len(args) == 1 and not kwargs:
+        return Field(function=args[0], depends=getargspec(args[0]).args)
+    elif kwargs.keys() == ["column"] and not args:
+        column = kwargs["column"]
+
+        def decorator(func):
+            args = getargspec(func).args
+            return Field(function=func, depends=args, column=column)
+        return decorator
+    else:
+        raise ValueError()
 
 
 class StaticField(BaseField):
@@ -232,7 +241,7 @@ class Manager(object):
                     if name in field.depends
                 }
                 value = field(**kwargs)
-                row.update({name: value})
+                row.update({field.column: value})
             yield row
 
     @property
