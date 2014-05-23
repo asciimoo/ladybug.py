@@ -50,7 +50,7 @@ class Employee(Table):
     salary = Field(format=int)  # weekly salary
     weeks = Field(format=int)  # weeks a year
 
-    @field("salary", "hours")
+    @field
     def wage(hours, salary):
         return salary / hours
 

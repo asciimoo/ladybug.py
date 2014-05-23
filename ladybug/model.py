@@ -16,6 +16,7 @@
 
 from csv import DictReader, DictWriter
 import itertools
+from inspect import getargspec
 
 
 def cmp_to_key(mycmp):
@@ -150,10 +151,9 @@ def Field(**kwargs):
         raise ValueError("A format or a function is required")
 
 
-def field(*args):
-    def decorator(func):
-        return Field(function=func, depends=args)
-    return decorator
+def field(func):
+    args = getargspec(func).args
+    return Field(function=func, depends=args)
 
 
 class StaticField(BaseField):
