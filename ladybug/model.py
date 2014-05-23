@@ -196,6 +196,10 @@ class Manager(object):
     def append_rows(self, source, **kwargs):
         """Append rows from a data source"""
         index = len(self._include)
+        if not self._data:
+            self._data = list()
+        if not self._include:
+            self._include = list()
         for source_row in source:
             row = dict()
             for field, source_field in kwargs.iteritems():
