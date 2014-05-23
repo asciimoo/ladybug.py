@@ -139,13 +139,24 @@ class Manager(object):
         if include is not None:
             self._include = include
         else:
-            self._include = list(range(len(data))) if data else list()
+            self._include = range(len(data)) if data else list()
 
     def read_data(self, reader):
         self._data = list()
         self._include = list()
         index = 0
         for row in reader:
+            self._data.append(self.model.result_class(row))
+            self._include.append(index)
+            index += 1
+
+    def append_rows(self, source, **kwargs):
+        """Append rows from a data source"""
+        index = len(self._include)
+        for source_row in source:
+            row = dict()
+            for field, source_field in kwargs.iteritems():
+                row[field] = source_row[source_field]
             self._data.append(self.model.result_class(row))
             self._include.append(index)
             index += 1
@@ -157,7 +168,7 @@ class Manager(object):
     @property
     def copy(self):
         new_data = list(row.copy() for row in self.rows)
-        new_include = list(range(len(new_data)))
+        new_include = range(len(new_data))
         return Manager(
             model=self.model.__class__, data=new_data, include=new_include)
 
