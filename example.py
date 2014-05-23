@@ -38,3 +38,5 @@ additional_rows = [
 table.append_rows(
     additional_rows, name="first_name", salary="cost", department="department")
 print table.group_by("department", key="name")
+
+print list(table.export_rows(first_name="name", dept="department"))

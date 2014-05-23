@@ -161,6 +161,13 @@ class Manager(object):
             self._include.append(index)
             index += 1
 
+    def export_rows(self, **kwargs):
+        for row in self.rows:
+            target_row = dict()
+            for target_field, field in kwargs.iteritems():
+                target_row[target_field] = row[field]
+            yield target_row
+
     @property
     def rows(self):
         return (self._data[i] for i in self._include)
