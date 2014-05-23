@@ -150,6 +150,12 @@ def Field(**kwargs):
         raise ValueError("A format or a function is required")
 
 
+def field(*args):
+    def decorator(func):
+        return Field(function=func, depends=args)
+    return decorator
+
+
 class StaticField(BaseField):
     """A field that's mapped to a column of a CSV file"""
     def __init__(self, format=str, column=None):

@@ -1,4 +1,4 @@
-from ladybug.model import Table, Field
+from ladybug.model import Table, Field, field
 
 
 class ExampleTable(Table):
@@ -48,15 +48,17 @@ class Employee(Table):
     name = Field()
     hours = Field(format=int)  # hours a week
     salary = Field(format=int)  # weekly salary
-    wage = Field(
-        function=lambda hours, salary: salary / hours,
-        depends=["hours", "salary"]
-    )
+    weeks = Field(format=int)  # weeks a year
+
+    @field("salary", "hours")
+    def wage(hours, salary):
+        return salary / hours
+
 
 employees = Employee.create()
 employees.append_rows([
-    {"name": "Bob", "hours": 40, "salary": 700},
-    {"name": "Joe", "hours": 30, "salary": 700},
-    {"name": "Roland", "hours": 35, "salary": 500},
-], name="name", hours="hours", salary="salary")
+    {"name": "Bob", "hours": 40, "salary": 700, "weeks": 30},
+    {"name": "Joe", "hours": 30, "salary": 700, "weeks": 45},
+    {"name": "Roland", "hours": 35, "salary": 500, "weeks": 45},
+], name="name", hours="hours", salary="salary", weeks="weeks")
 print employees.group_by("name", key="wage")
